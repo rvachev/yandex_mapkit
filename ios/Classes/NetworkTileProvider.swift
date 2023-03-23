@@ -1,0 +1,52 @@
+//
+//  NetworkTileProvider.swift
+//  yandex_mapkit
+//
+//  Created by Роман Рвачев on 22.03.2023.
+//
+
+import Foundation
+import YandexMapsMobile
+
+public class NetworkTileProvider: NSObject, YMKTileProvider {
+    private var baseUrl: String
+    private let headers: [String: Any]
+    
+    public required init(baseUrl: String, headers: [String : Any]) {
+        self.baseUrl = baseUrl
+        self.headers = headers
+    }
+    
+    public func getBaseUrl() -> String {
+        return baseUrl
+    }
+    
+    public func load(with tileId: YMKTileId, version: YMKVersion, etag: String) -> YMKRawTile {
+        let formattedUrl = baseUrl.replacingOccurrences(of: "{x}", with: String(tileId.x)).replacingOccurrences(of: "{y}", with: String(tileId.y)).replacingOccurrences(of: "{z}", with: String(tileId.z + 1))
+        let url = URL(string: formattedUrl)
+        let data = downloadFile(url: url)
+        return YMKRawTile(version: version, etag: etag, state: YMKRawTileState.ok, rawData: data)
+    }
+    
+    private func downloadFile(url: URL?) -> Data {
+        var request = URLRequest(url: url!)
+        var receivedData = Data()
+        request.httpMethod = "GET"
+        for header in headers {
+            request.setValue((header.value as! String), forHTTPHeaderField: header.key)
+        }
+        let group = DispatchGroup()
+        group.enter()
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            if error != nil {
+                return
+            }
+            guard let data = data else {return}
+            receivedData = data
+            group.leave()
+        }
+        task.resume()
+        group.wait()
+        return receivedData
+    }
+}

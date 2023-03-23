@@ -17,6 +17,7 @@ public class YandexMapController:
   private let userLocationLayer: YMKUserLocationLayer!
   private let trafficLayer: YMKTrafficLayer!
   private var mapObjectCollections: [YMKMapObjectCollection] = []
+  private var tileProviders: [NetworkTileProvider] = []
   private var userPinController: PlacemarkMapObjectController?
   private var userArrowController: PlacemarkMapObjectController?
   private var userAccuracyCircleController: CircleMapObjectController?
@@ -28,6 +29,10 @@ public class YandexMapController:
     )
   }()
   private let mapView: FLYMKMapView
+  private let projection: YMKProjection
+  private let imageUrlProvider: YMKImagesDefaultUrlProvider
+  private let layerOptions = YMKLayerOptions(active: true, nightModeAvailable: false, cacheable: true, animateOnActivation: false, tileAppearingAnimationDuration: TimeInterval(400), overzoomMode: YMKOverzoomMode.disabled, transparent: false)
+  private var existedLayers: [String: YMKLayer] = [:]
 
   public required init(id: Int64, frame: CGRect, registrar: FlutterPluginRegistrar, params: [String: Any]) {
     self.pluginRegistrar = registrar
@@ -38,6 +43,8 @@ public class YandexMapController:
     )
     self.userLocationLayer = YMKMapKit.sharedInstance().createUserLocationLayer(with: mapView.mapWindow)
     self.trafficLayer = YMKMapKit.sharedInstance().createTrafficLayer(with: mapView.mapWindow)
+    self.projection = YMKProjections.sphericalMercator()
+    self.imageUrlProvider = YMKImagesDefaultUrlProvider()
 
     super.init()
 
@@ -53,6 +60,7 @@ public class YandexMapController:
 
     applyMapOptions(params["mapOptions"] as! [String: Any])
     applyMapObjects(params["mapObjects"] as! [String: Any])
+      setupCustomLayers(providers: Utils.tileProvidersFromJson(params["tiles"] as! [[String: Any]]))
   }
 
   public func view() -> UIView {
@@ -82,6 +90,9 @@ public class YandexMapController:
       result(nil)
     case "updateMapOptions":
       updateMapOptions(call)
+      result(nil)
+    case "updateTiles":
+      updateTiles(call)
       result(nil)
     case "getMinZoom":
       let minZoom = getMinZoom()
@@ -406,6 +417,36 @@ public class YandexMapController:
       animationType: animation,
       cameraCallback: { (completed: Bool) -> Void in result(completed) }
     )
+  }
+    
+  private func setupCustomLayers(providers: [NetworkTileProvider]) {
+      tileProviders = providers
+        
+      var currentLayers = Set<String>()
+        
+      let map = mapView.mapWindow.map
+      for provider in tileProviders {
+          currentLayers.insert(provider.getBaseUrl())
+          if existedLayers[provider.getBaseUrl()] != nil {
+              continue
+          }
+          let layer = map.addLayer(withLayerId: provider.getBaseUrl(), contentType: "image/png", layerOptions: YMKLayerOptions(), tileProvider: provider, imageUrlProvider: imageUrlProvider, projection: projection)
+          layer.invalidate(withVersion: "0.0.0")
+          existedLayers[provider.getBaseUrl()] = layer
+      }
+        
+      for entry in existedLayers {
+          if !currentLayers.contains(entry.key) {
+              existedLayers[entry.key]?.remove()
+              existedLayers.removeValue(forKey: entry.key)
+          }
+      }
+  }
+    
+  public func updateTiles(_ call: FlutterMethodCall) {
+      let params = call.arguments as! [[String: Any]]
+        
+      setupCustomLayers(providers: Utils.tileProvidersFromJson(params))
   }
 
   public func applyMapOptions(_ params: [String: Any]) {

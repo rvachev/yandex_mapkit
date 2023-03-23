@@ -9,6 +9,17 @@ class Utils {
       alpha: CGFloat((value & 0xFF000000) >> 24) / 0xFF
     )
   }
+    
+    static func tileProvidersFromJson(_ json: [[String: Any]]) -> [NetworkTileProvider] {
+        if json.isEmpty {
+            return []
+        }
+        var providers = [NetworkTileProvider]()
+        for rawTile in json {
+            providers.append(NetworkTileProvider(baseUrl: rawTile["baseUrl"] as! String, headers: rawTile["headers"] as! [String: Any]))
+        }
+        return providers
+    }
 
   static func screenPointFromJson(_ json: [String: NSNumber]) -> YMKScreenPoint {
     return YMKScreenPoint(

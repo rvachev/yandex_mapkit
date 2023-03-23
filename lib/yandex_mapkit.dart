@@ -65,6 +65,7 @@ part 'src/types/suggest/suggest_type.dart';
 part 'src/types/user_location_view.dart';
 part 'src/types/user_location_anchor.dart';
 part 'src/types/visible_region.dart';
+part 'src/types/network_tile_provider.dart';
 part 'src/yandex_bicycle.dart';
 part 'src/yandex_driving.dart';
 part 'src/yandex_map.dart';
