@@ -91,8 +91,6 @@ public class YandexMapController implements
     private MethodChannel.Result initResult;
     private Projection projection = Projections.getSphericalMercator();
     private DefaultImageUrlProvider imageUrlProvider = new DefaultImageUrlProvider();;
-    private ArrayList<NetworkTileProvider> tileProviders = new ArrayList<>();
-    private LayerOptions layerOptions = new LayerOptions(true, false, true, false, 400L, OverzoomMode.DISABLED, false);
     private Map<NetworkTileProvider, Layer> existedLayers = new HashMap<>();
 
     @SuppressWarnings({"unchecked", "ConstantConditions", "InflateParams"})

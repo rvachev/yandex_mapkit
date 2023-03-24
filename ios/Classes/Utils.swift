@@ -16,7 +16,7 @@ class Utils {
         }
         var providers = [NetworkTileProvider]()
         for rawTile in json {
-            providers.append(NetworkTileProvider(baseUrl: rawTile["baseUrl"] as! String, headers: rawTile["headers"] as! [String: Any]))
+            providers.append(NetworkTileProvider(baseUrl: rawTile["baseUrl"] as! String, headers: rawTile["headers"] as! [String: String]))
         }
         return providers
     }

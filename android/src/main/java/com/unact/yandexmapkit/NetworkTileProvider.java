@@ -1,17 +1,10 @@
 package com.unact.yandexmapkit;
 
-import android.net.Uri;
-import android.util.Log;
-
 import androidx.annotation.NonNull;
 
 import com.yandex.mapkit.RawTile;
 import com.yandex.mapkit.TileId;
 import com.yandex.mapkit.Version;
-import com.yandex.mapkit.geometry.Point;
-import com.yandex.mapkit.geometry.geo.Projection;
-import com.yandex.mapkit.geometry.geo.Projections;
-import com.yandex.mapkit.geometry.geo.XYPoint;
 import com.yandex.mapkit.tiles.TileProvider;
 
 import java.io.ByteArrayOutputStream;
@@ -24,9 +17,9 @@ import java.util.Objects;
 
 public class NetworkTileProvider implements TileProvider {
     private final String baseUrl;
-    private final Map<String, Object> headers;
+    private final Map<String, String> headers;
 
-    NetworkTileProvider(String baseUrl, Map<String, Object> headers) {
+    NetworkTileProvider(String baseUrl, Map<String, String> headers) {
         this.baseUrl = baseUrl;
         this.headers = headers;
     }
@@ -61,8 +54,8 @@ public class NetworkTileProvider implements TileProvider {
         try {
             HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
             urlConnection.setRequestMethod("GET");
-            for (Map.Entry<String, Object> entry : headers.entrySet()) {
-                urlConnection.setRequestProperty(entry.getKey(), entry.getValue().toString());
+            for (Map.Entry<String, String> entry : headers.entrySet()) {
+                urlConnection.setRequestProperty(entry.getKey(), entry.getValue());
             }
             urlConnection.connect();
             is = urlConnection.getInputStream();

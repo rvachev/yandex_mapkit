@@ -45,7 +45,7 @@ public class Utils {
         }
         ArrayList<NetworkTileProvider> providers = new ArrayList<>();
         for (Map<String, Object> item : json) {
-            providers.add(new NetworkTileProvider((String) item.get("baseUrl"), (Map<String, Object>) item.get("headers")));
+            providers.add(new NetworkTileProvider((String) item.get("baseUrl"), (Map<String, String>) item.get("headers")));
         }
         return providers;
     }

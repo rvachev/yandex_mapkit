@@ -17,7 +17,6 @@ public class YandexMapController:
   private let userLocationLayer: YMKUserLocationLayer!
   private let trafficLayer: YMKTrafficLayer!
   private var mapObjectCollections: [YMKMapObjectCollection] = []
-  private var tileProviders: [NetworkTileProvider] = []
   private var userPinController: PlacemarkMapObjectController?
   private var userArrowController: PlacemarkMapObjectController?
   private var userAccuracyCircleController: CircleMapObjectController?
@@ -31,8 +30,7 @@ public class YandexMapController:
   private let mapView: FLYMKMapView
   private let projection: YMKProjection
   private let imageUrlProvider: YMKImagesDefaultUrlProvider
-  private let layerOptions = YMKLayerOptions(active: true, nightModeAvailable: false, cacheable: true, animateOnActivation: false, tileAppearingAnimationDuration: TimeInterval(400), overzoomMode: YMKOverzoomMode.disabled, transparent: false)
-  private var existedLayers: [String: YMKLayer] = [:]
+  private var existedLayers: [NetworkTileProvider: YMKLayer] = [:]
 
   public required init(id: Int64, frame: CGRect, registrar: FlutterPluginRegistrar, params: [String: Any]) {
     self.pluginRegistrar = registrar
@@ -420,19 +418,17 @@ public class YandexMapController:
   }
     
   private func setupCustomLayers(providers: [NetworkTileProvider]) {
-      tileProviders = providers
-        
-      var currentLayers = Set<String>()
+      var currentLayers = Set<NetworkTileProvider>()
         
       let map = mapView.mapWindow.map
-      for provider in tileProviders {
-          currentLayers.insert(provider.getBaseUrl())
-          if existedLayers[provider.getBaseUrl()] != nil {
+      for provider in providers {
+          currentLayers.insert(provider)
+          if existedLayers[provider] != nil {
               continue
           }
           let layer = map.addLayer(withLayerId: provider.getBaseUrl(), contentType: "image/png", layerOptions: YMKLayerOptions(), tileProvider: provider, imageUrlProvider: imageUrlProvider, projection: projection)
           layer.invalidate(withVersion: "0.0.0")
-          existedLayers[provider.getBaseUrl()] = layer
+          existedLayers[provider] = layer
       }
         
       for entry in existedLayers {

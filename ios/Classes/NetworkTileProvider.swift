@@ -9,10 +9,10 @@ import Foundation
 import YandexMapsMobile
 
 public class NetworkTileProvider: NSObject, YMKTileProvider {
-    private var baseUrl: String
-    private let headers: [String: Any]
+    private let baseUrl: String
+    private let headers: [String: String]
     
-    public required init(baseUrl: String, headers: [String : Any]) {
+    public required init(baseUrl: String, headers: [String : String]) {
         self.baseUrl = baseUrl
         self.headers = headers
     }
@@ -33,7 +33,7 @@ public class NetworkTileProvider: NSObject, YMKTileProvider {
         var receivedData = Data()
         request.httpMethod = "GET"
         for header in headers {
-            request.setValue((header.value as! String), forHTTPHeaderField: header.key)
+            request.setValue(header.value, forHTTPHeaderField: header.key)
         }
         let group = DispatchGroup()
         group.enter()
@@ -48,5 +48,21 @@ public class NetworkTileProvider: NSObject, YMKTileProvider {
         task.resume()
         group.wait()
         return receivedData
+    }
+    
+    public override func isEqual(_ object: Any?) -> Bool {
+        guard let object = object else { return false }
+        
+        guard let rightChild = object as? NetworkTileProvider else { return false }
+        
+        if self === rightChild {
+            return true
+        }
+        
+        return baseUrl == rightChild.baseUrl && headers == rightChild.headers
+    }
+    
+    public override var hash: Int {
+        return baseUrl.hash ^ headers.hashValue
     }
 }
