@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Map;
+import java.util.Objects;
 
 public class NetworkTileProvider implements TileProvider {
     private final String baseUrl;
@@ -79,5 +80,18 @@ public class NetworkTileProvider implements TileProvider {
             if (is != null) { is.close(); }
         }
         return baos.toByteArray();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        NetworkTileProvider that = (NetworkTileProvider) o;
+        return Objects.equals(baseUrl, that.baseUrl) && Objects.equals(headers, that.headers);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(baseUrl, headers);
     }
 }

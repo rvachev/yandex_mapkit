@@ -10,8 +10,7 @@ import com.yandex.mapkit.MapKitFactory;
 public class MainActivity extends FlutterActivity {
   @Override
   public void configureFlutterEngine(@NonNull FlutterEngine flutterEngine) {
-    MapKitFactory.setLocale("YOUR_LOCALE");
-    MapKitFactory.setApiKey("YOUR_API_KEY");
+    MapKitFactory.setApiKey("79aaa11d-73d0-4041-8623-7680aab5bdab");
     super.configureFlutterEngine(flutterEngine);
   }
 }

@@ -93,7 +93,7 @@ public class YandexMapController implements
     private DefaultImageUrlProvider imageUrlProvider = new DefaultImageUrlProvider();;
     private ArrayList<NetworkTileProvider> tileProviders = new ArrayList<>();
     private LayerOptions layerOptions = new LayerOptions(true, false, true, false, 400L, OverzoomMode.DISABLED, false);
-    private Map<String, Layer> existedLayers = new HashMap<>();
+    private Map<NetworkTileProvider, Layer> existedLayers = new HashMap<>();
 
     @SuppressWarnings({"unchecked", "ConstantConditions", "InflateParams"})
     public YandexMapController(
@@ -228,13 +228,11 @@ public class YandexMapController implements
             return;
         }
 
-        tileProviders = providers;
+        Set<NetworkTileProvider> currentLayers = new HashSet<>();
 
-        Set<String> currentLayers = new HashSet<>();
-
-        for (NetworkTileProvider provider : tileProviders) {
-            currentLayers.add(provider.getBaseUrl());
-            if (provider.getBaseUrl() == null || existedLayers.containsKey(provider.getBaseUrl())) {
+        for (NetworkTileProvider provider : providers) {
+            currentLayers.add(provider);
+            if (provider.getBaseUrl() == null || existedLayers.containsKey(provider)) {
                 continue;
             }
             Layer l = mapView.getMap().addLayer(
@@ -245,10 +243,10 @@ public class YandexMapController implements
                     imageUrlProvider,
                     projection);
             l.invalidate("0.0.0");
-            existedLayers.put(provider.getBaseUrl(), l);
+            existedLayers.put(provider, l);
         }
 
-        for (Map.Entry<String, Layer> entry : existedLayers.entrySet()) {
+        for (Map.Entry<NetworkTileProvider, Layer> entry : existedLayers.entrySet()) {
             if(!currentLayers.contains(entry.getKey())) {
                 Objects.requireNonNull(existedLayers.get(entry.getKey())).remove();
                 existedLayers.remove(entry.getKey());
